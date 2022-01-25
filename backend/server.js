@@ -28,9 +28,16 @@ app.use('/messages' , messageRoute)
 
 
 let users = []
-
+let conversation =[]
+const addConversation = ({senderId , reciverId , conversationId})=>{
+    !conversation.some(c => c.conversationId === conversationId) && conversation.push({senderId , reciverId , conversationId})
+}
  const addUser = ({userId , socketId})=>{
      !users.some(user => user.userId === userId) && users.push({userId , socketId})
+ }
+
+ const removeConversation = ({conversationId})=>{
+     conversation = conversation.filter(c => c.conversationId !== conversationId)
  }
 
  const removeUser = ({socketId}) =>{
@@ -40,23 +47,48 @@ let users = []
  const getUser = ({userId})=>users.find(user => user.userId === userId)
 
 io.on('connection' , (socket)=>{
-    console.log('a user connect')
-   //  take user id and socket id
-  socket.on('addUser' , (userId) =>{
-     addUser({userId , socketId:socket.id})
-      io.emit('getUsers' , users)
-  })
-  // send and get message
-  socket.on('sendMessage' , ({senderId , reciverId , text}) =>{
+    //  take user id and socket id
+    socket.broadcast.emit('onlineUsers' , users)
+    socket.on('addUser' , (userId) =>{
+        addUser({userId , socketId:socket.id})
+        io.emit('getUsers' , users)
+    })
+  // send and get and remove message
+  socket.on('sendMessage' , ({sender, reciverId , text,createdAt,conversationId}) =>{
    const user = getUser({userId:reciverId})
       io.to(user?.socketId).emit('getMessage' , {
-          senderId,
-          text
+          sender,
+          text,
+          createdAt,
+          conversationId,
       })
   })
+  socket.on('sendReadMsg' , ({reciverId , read})=>{
+    const user = getUser({userId:reciverId})
+    io.to(user.socketId).emit('getReadMsg' , {
+        read
+    })
+
+  })
+  socket.on('removeMessage' , ({reciverId , status}) =>{
+    const user = getUser({userId:reciverId})
+    io.to(user.socketId).emit('getRmvMsg' , {
+        status
+    })
+  })
+  //add and remove conversation
+ socket.on('addConversation' ,({reciverId ,senderId , conversationId})=>{
+  addConversation({senderId , reciverId , conversationId})
+  io.emit('getConversation' , conversation)
+ })
+
+ socket.on('removeConversation' , ({conversationId}) =>{
+     removeConversation({conversationId})
+     io.emit('getConversation' , conversation)
+ })
   //dissconnect 
     socket.on('disconnect' , ()=>{
-        console.log('a user disconnect')
+        // console.log('a user disconnect')
 
         removeUser({socketId:socket.id})
         io.emit('getUsers' , users)

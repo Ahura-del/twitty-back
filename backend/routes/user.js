@@ -9,11 +9,11 @@ const env = require("dotenv");
 const ShowUsers = require("../model/ShowUsers");
 env.config();
 
-router.get('/searchUser/:name' , verify , async(req,res)=>{
+router.get('/allUsers' , verify , async(req , res)=>{
   try {
-    const users = await ShowUsers.find({name:req.params.name})
-    if (!users) return res.status(400).send({ message: "User not exist" });
-    res.status(200).json(users)
+    const users = await ShowUsers.find()
+    if(!users) return res.status(400).send({message:'There is no user'})
+    res.status(200).send(users)
   } catch (error) {
     res.status(400).send({message:error.message})
   }

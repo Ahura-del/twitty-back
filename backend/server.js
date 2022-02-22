@@ -9,6 +9,7 @@ const io = require('socket.io')(server , {
 })
 const mongoose = require('mongoose')
  const cors = require('cors')
+ const webpush = require('web-push')
 const env = require('dotenv')
 const authRoute = require('./routes/auth')
 const userRoute = require('./routes/user')
@@ -19,12 +20,24 @@ env.config()
 app.use(cors())
 app.use(express.json({limit:'50mb'}))
 app.use(express.urlencoded({extended:false}))
+webpush.setVapidDetails("mailto:ahuradel@gmail.com" , process.env.PUBLIC_VPID_KEY ,process.env.PRIVATE_VPID_KEY)
 mongoose.connect("mongodb://localhost:27017/twitty_db"  , ()=>{console.log('connect to db')})
 app.use('/auth' , authRoute)
 app.use('/user' , userRoute)
 app.use('/conversation' , conversationRoute)
 app.use('/messages' , messageRoute)
+app.post('/notification' , (req , res)=>{
+    const payload = JSON.stringify({
+        title:req.body.title,
+        description:req.body.description,
+        openUrl : '/'
+    })
+    webpush.sendNotification(req.body.subscription , payload)
+    .then(res => console.log(res))
+    .catch(err => console.log(err.stack))
 
+    res.status(200).json({"success":true})
+})
 
 
 let users = []
@@ -47,6 +60,7 @@ const addConversation = ({senderId , reciverId , conversationId})=>{
  const getUser = ({userId})=>users.find(user => user.userId === userId)
 
 io.on('connection' , (socket)=>{
+    console.log('user connect')
     //  take user id and socket id
     socket.broadcast.emit('onlineUsers' , users)
     socket.on('addUser' , (userId) =>{
@@ -88,7 +102,7 @@ io.on('connection' , (socket)=>{
  })
   //dissconnect 
     socket.on('disconnect' , ()=>{
-        // console.log('a user disconnect')
+        console.log('a user disconnect')
 
         removeUser({socketId:socket.id})
         io.emit('getUsers' , users)

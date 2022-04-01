@@ -33,6 +33,15 @@ router.get("/:conversationId", verifyToken, async (req, res) => {
   }
 });
 
+router.put("/:conversationId", verifyToken, async (req, res) => {
+  try {
+    const updateMessages =await Message.updateMany({} , {$set:{isRead:req.body.isRead}})
+    res.status(200).send('ok');
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+});
+
 //remove history
 router.delete("/:conversationId", verifyToken, async (req, res) => {
   try {

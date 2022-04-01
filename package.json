@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon node backend/server.js",
-    "web-push":"web-push"
+    "web-push": "web-push"
   },
   "keywords": [],
   "author": "",

@@ -26,7 +26,6 @@ router.get("/:conversationId", verifyToken, async (req, res) => {
     const messages = await Message.find({
       conversationId: req.params.conversationId,
     });
-   
     res.status(200).send(messages);
   } catch (error) {
     res.status(500).send({ message: error.message });

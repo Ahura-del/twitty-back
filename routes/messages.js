@@ -17,7 +17,7 @@ router.post("/", verifyToken, async (req, res) => {
         }
     res.status(200).json(savedMessage);
   } catch (error) {
-    res.status(500).send({ message: error.message });
+    res.status(500).send(error.message);
   }
 });
 
@@ -28,7 +28,7 @@ router.get("/:conversationId", verifyToken, async (req, res) => {
     });
     res.status(200).send(messages);
   } catch (error) {
-    res.status(500).send({ message: error.message });
+    res.status(500).send(error);
   }
 });
 
@@ -37,7 +37,7 @@ router.put("/:conversationId", verifyToken, async (req, res) => {
     const updateMessages =await Message.updateMany({} , {$set:{isRead:req.body.isRead}})
     res.status(200).send('ok');
   } catch (error) {
-    res.status(500).send({ message: error.message });
+    res.status(500).send(error.message);
   }
 });
 
@@ -48,9 +48,9 @@ router.delete("/:conversationId", verifyToken, async (req, res) => {
     const removeMessages = await Message.deleteMany({
         conversationId: req.params.conversationId,
     });
-    res.status(200).send({ message: "message delete" });
+    res.status(200).send("message delete" );
   } catch (error) {
-    res.status(500).send({ message: error.message });
+    res.status(500).send(error);
   }
 });
 

@@ -12,37 +12,38 @@ env.config();
 router.get('/allUsers' , verify , async(req , res)=>{
   try {
     const users = await ShowUsers.find()
-    if(!users) return res.status(400).send({message:'There is no user'})
+    if(!users) return res.status(400).send('There is no user')
     res.status(200).send(users)
   } catch (error) {
-    res.status(400).send({message:error.message})
+    res.status(400).send(error)
   }
 })
 
 router.get('/allUsers/:userId' , verify , async(req,res)=>{
   try {
     const users = await ShowUsers.findById(req.params.userId)
-    if (!users) return res.status(400).send({ message: "User not exist" });
+    if (!users) return res.status(400).send("User not exist");
     res.status(200).json(users)
   } catch (error) {
-    res.status(400).send({message:error.message})
+    res.status(400).send(error)
   }
 })
 
 router.get("/:userId", verify, async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
-    if (!user) return res.status(400).send({ message: "Email not exist" });
+    if (!user) return res.status(400).send("Email not exist" );
     res.status(200).send(user);
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    res.status(400).send(error);
   }
 });
+
 
 router.get("/fPass/:email", async (req, res) => {
   try {
     const user = await User.findOne({ email: req.params.email });
-    if (!user) return res.status(400).send({ message: "Email is not exist" });
+    if (!user) return res.status(400).send("Email is not exist");
 
     //create verify code
     const min = 1000;
@@ -52,7 +53,7 @@ router.get("/fPass/:email", async (req, res) => {
     forgetPasswordCode(user, uniquCode);
     res.status(200).send({ id: user._id, code: uniquCode });
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    res.status(400).send(error);
   }
 });
 
@@ -86,7 +87,7 @@ router.put("/verify/:userId", async (req, res) => {
     const seavedAddToUsers = await addtoUsers.save()
     res.status(200).send({ userId: "user updated", token });
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    res.status(400).send(error);
   }
 });
 
@@ -117,7 +118,7 @@ router.put("/fPass/:userId", async (req, res) => {
     );
     res.status(200).send({ user: "user updated", token, id: user._id });
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    res.status(400).send(error);
   }
 });
 
@@ -151,19 +152,19 @@ router.put("/:userId", verify, async (req, res) => {
         },
       }
     );
-    res.status(200).send({ message: "user Update" });
+    res.status(200).send("user Update" );
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    res.status(400).send(error);
   }
 });
 
 //update user password
 router.put("/newPass/:userId", verify, async (req, res) => {
   const user = await User.findById(req.params.userId);
-  if (!user) return res.status(400).send({ message: "User not found!" });
+  if (!user) return res.status(400).send("User not found!" );
   //password is correct
   const validPass = await bcrypt.compare(req.body.oldPass, user.password);
-  if (!validPass) return res.status(400).send({ message: "Invalid Passeord" });
+  if (!validPass) return res.status(400).send("Invalid Passeord" );
   //hash password
   const salt = await bcrypt.genSalt(10);
   const hashedPass = await bcrypt.hash(req.body.newPass, salt);
@@ -178,18 +179,18 @@ router.put("/newPass/:userId", verify, async (req, res) => {
         },
       }
     );
-    res.status(200).send({ message: "password changed" });
+    res.status(200).send("password changed" );
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    res.status(400).send(error);
   }
 });
 
 router.delete("/:userId", verify, async (req, res) => {
   const user = await User.findById(req.params.userId);
-  if (!user) return res.status(400).send({ message: "User not found!"});
+  if (!user) return res.status(400).send("User not found!");
   //password is correct
   const validPass = await bcrypt.compare(req.body.delPass, user.password);
-  if (!validPass) return res.status(400).send({ message: "Invalid Passeord" });
+  if (!validPass) return res.status(400).send("Invalid Passeord" );
   try {
     const removeShowUsers = await ShowUsers.deleteOne({
       _id:user._id
@@ -198,9 +199,9 @@ router.delete("/:userId", verify, async (req, res) => {
       _id: user._id,
     });
  
-    res.status(200).send({ message: "user removed" });
+    res.status(200).send("user removed");
   } catch (error) {
-    res.status(400).send({ message: error.message });
+    res.status(400).send(error);
   }
 });
 

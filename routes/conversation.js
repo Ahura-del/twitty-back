@@ -9,7 +9,7 @@ router.post('/' , verifyToken , async (req , res)=>{
         members: { $all: [req.body.reciverId,req.body.senderId] } 
     })
   
-    if(c)return res.status(400).send({message:"Conversation already exist"})
+    if(c)return res.status(400).send("Conversation already exist")
 
     const newConversation = new Conversation({
         members:[req.body.reciverId,req.body.senderId]
@@ -19,7 +19,7 @@ router.post('/' , verifyToken , async (req , res)=>{
         const savedConversation = await newConversation.save()
         res.status(200).send(savedConversation)
     } catch (error) {
-        res.status(500).send({message:error.message})
+        res.status(500).send(error)
     }
 })
 
@@ -30,7 +30,7 @@ router.get('/:userId' , verifyToken , async(req , res)=>{
         })
         res.status(200).json(conversation)
     } catch (error) {
-        res.status(500).send({message:error.message})
+        res.status(500).send(error)
     }
 })
 
@@ -47,9 +47,9 @@ const removeMessages = await Message.deleteMany({
             _id:conversation[0]._id
         })
 
-        res.status(200).send({message:'conversation deleted'})
+        res.status(200).send('conversation deleted')
     } catch (error) {
-        res.status(500).send({message:error.message})
+        res.status(500).send(error)
 
     }
 })

@@ -23,13 +23,19 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: false }));
 webpush.setVapidDetails(
-  "mailto:ahuradel@gmail.com",
+  process.env.WEBPUSH_MAIL,
   process.env.PUBLIC_VPID_KEY,
   process.env.PRIVATE_VPID_KEY
 );
-mongoose.connect("mongodb://localhost:27017/twitty_db", () => {
+mongoose.connect(process.env.DATABASE_URL,{
+  useNewUrlParser:true,
+  useUnifiedTopology:true,
+} ,() => {
   console.log("connect to db");
 });
+app.get('/',(req,res)=>{
+  res.send('twitty api')
+})
 app.use("/auth", authRoute);
 app.use("/user", userRoute);
 app.use("/conversation", conversationRoute);
@@ -60,7 +66,6 @@ const removeUser = ({ socketId }) => {
 const getUser = ({ userId }) => users.find((user) => user.userId === userId);
 
 io.on("connection", (socket) => {
-  console.log("user connect");
   //  take user id and socket id
   socket.broadcast.emit("onlineUsers", users);
   socket.on("addUser", (userId) => {
@@ -90,7 +95,6 @@ io.on("connection", (socket) => {
           })
           webpush
           .sendNotification(endpoint , payload)
-          // .then((res) => console.log(res))
           .catch((err) => console.log(err));
           
           
